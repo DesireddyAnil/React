@@ -1,9 +1,30 @@
 import React, { /*useState*/ Component } from "react";
 import "./App.css";
-import Radium, { StyleRoot } from "radium";  // this package is useful for implementing scoped styles with pseudo selectors and media queries (App should be wrapped around StyleRoot if any scoped media queries are present in our application) and notice how components are exported
+import styled from "styled-components"; // basically styled component are fxnal react components
+// import Radium, { StyleRoot } from "radium";  // this package is useful for implementing scoped styles with pseudo selectors and media queries (App should be wrapped around StyleRoot if any scoped media queries are present in our application) and notice how components are exported
 import Person from "./Person/Person";
 
 // through out this course we will follow class components only as it is pretty established practice
+
+
+// note that in styled components we write actual css. for dynamic part we use ${} to inject js
+const StyledButton = styled.button` 
+  background-color: ${(props) => (props.alt ? "red" : "green")};
+  color: white;
+  border: 1px solid blue;
+  padding: 8px;
+  font: inherit;
+  cursor: pointer;
+  &:hover {
+    background-color: ${(props) => (props.alt ? "salmon" : "lightgreen")};
+    color: black;
+  }
+`;
+
+const StyledParagraph = styled.p`
+  color: ${(props) => props.items < 3 && "red"};
+  font-weight: ${(props) => props.items < 2 && "bold"};
+`;
 
 // class component
 class App extends Component {
@@ -14,7 +35,7 @@ class App extends Component {
       { id: 3, name: "idk", age: 30 },
     ],
     otherState: "otherStateValue",
-    showPersons: false,
+    isPersonsVisible: false,
   };
 
   deletePersonHandler = (personIndex) => {
@@ -40,27 +61,14 @@ class App extends Component {
   };
 
   togglePersonsHandler = () => {
-    const doShowPersons = this.state.showPersons;
+    const doShowPersons = this.state.isPersonsVisible;
     this.setState({ showPersons: !doShowPersons });
   };
 
   render() {
-    const style = {
-      backgroundColor: "green",
-      color: "white",
-      border: "1px solid blue",
-      padding: "8px",
-      font: "inherit",
-      cursor: "pointer",
-      ":hover": {
-        backgroundColor: "lightgreen",
-        color: "black",
-      },
-    };
-
     let persons = null;
 
-    if (this.state.showPersons) {
+    if (this.state.isPersonsVisible) {
       persons = (
         <div>
           {this.state.persons.map((person, index) => {
@@ -76,32 +84,22 @@ class App extends Component {
           })}
         </div>
       );
-      style.backgroundColor = "red";
-      style[":hover"] = {
-        backgroundColor: "salmon",
-        color: "black",
-      };
-    }
-
-    const classes = [];
-    if (this.state.persons.length < 3) {
-      classes.push("red");
-    }
-    if (this.state.persons.length < 2) {
-      classes.push("bold");
     }
 
     return (
-      <StyleRoot>
-        <div className="App">
-          <h1 className="App-title">Hi, imma react app</h1>
-          <p className={classes.join(" ")}>I show list of persons</p>
-          <button style={style} onClick={this.togglePersonsHandler}>
-            Toggle persons
-          </button>
-          {persons}
-        </div>
-      </StyleRoot>
+      <div className="App">
+        <h1 className="App-title">Hi, imma react app</h1>
+        <StyledParagraph items={this.state.persons.length}>
+          I show list of persons
+        </StyledParagraph>
+        <StyledButton
+          alt={this.state.isPersonsVisible}
+          onClick={this.togglePersonsHandler}
+        >
+          Toggle persons
+        </StyledButton>
+        {persons}
+      </div>
     );
   }
 }
@@ -167,4 +165,5 @@ const App = () => {
 };
 */
 
-export default Radium(App);
+//export default Radium(App);
+export default App;

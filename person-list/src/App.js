@@ -1,5 +1,6 @@
 import React, { /*useState*/ Component } from "react";
 import "./App.css";
+import Radium, { StyleRoot } from "radium";  // this package is useful for implementing scoped styles with pseudo selectors and media queries (App should be wrapped around StyleRoot if any scoped media queries are present in our application) and notice how components are exported
 import Person from "./Person/Person";
 
 // through out this course we will follow class components only as it is pretty established practice
@@ -10,6 +11,7 @@ class App extends Component {
     persons: [
       { id: 1, name: "anil", age: 25 },
       { id: 2, name: "someone", age: 26 },
+      { id: 3, name: "idk", age: 30 },
     ],
     otherState: "otherStateValue",
     showPersons: false,
@@ -18,7 +20,7 @@ class App extends Component {
   deletePersonHandler = (personIndex) => {
     const persons = [...this.state.persons].filter(
       (_, index) => personIndex !== index
-    ); // work on duplicate data to make sure original data is not being disturbed as it might lead to crashes when other components are using the same data
+    ); // always work on duplicate data to make sure original data is not being disturbed as it might lead to crashes when other components are using the same data
     this.setState({
       persons,
     });
@@ -44,11 +46,16 @@ class App extends Component {
 
   render() {
     const style = {
-      backgroundColor: "white",
+      backgroundColor: "green",
+      color: "white",
       border: "1px solid blue",
       padding: "8px",
       font: "inherit",
       cursor: "pointer",
+      ":hover": {
+        backgroundColor: "lightgreen",
+        color: "black",
+      },
     };
 
     let persons = null;
@@ -69,18 +76,32 @@ class App extends Component {
           })}
         </div>
       );
+      style.backgroundColor = "red";
+      style[":hover"] = {
+        backgroundColor: "salmon",
+        color: "black",
+      };
+    }
+
+    const classes = [];
+    if (this.state.persons.length < 3) {
+      classes.push("red");
+    }
+    if (this.state.persons.length < 2) {
+      classes.push("bold");
     }
 
     return (
-      <div className="App">
-        <header className="App-header">
+      <StyleRoot>
+        <div className="App">
           <h1 className="App-title">Hi, imma react app</h1>
+          <p className={classes.join(" ")}>I show list of persons</p>
           <button style={style} onClick={this.togglePersonsHandler}>
             Toggle persons
           </button>
           {persons}
-        </header>
-      </div>
+        </div>
+      </StyleRoot>
     );
   }
 }
@@ -146,4 +167,4 @@ const App = () => {
 };
 */
 
-export default App;
+export default Radium(App);

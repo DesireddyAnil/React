@@ -1,34 +1,28 @@
 import React, { /*useState*/ Component } from "react";
 import "./App.css";
-import styled from "styled-components"; // basically styled component are fxnal react components
 // import Radium, { StyleRoot } from "radium";  // this package is useful for implementing scoped styles with pseudo selectors and media queries (App should be wrapped around StyleRoot if any scoped media queries are present in our application) and notice how components are exported
-import Person from "./Person/Person";
+import Persons from "../Components/Persons/Persons";
+import Cockpit from "../Components/Cockpit/Cockpit";
+import WithClassName from "../Hoc/WithClassName";
+import AuthContext from "../Context/AuthContext"; // to solve the problem of prop chaining
 
 // through out this course we will follow class components only as it is pretty established practice
 
-
-// note that in styled components we write actual css. for dynamic part we use ${} to inject js
-const StyledButton = styled.button` 
-  background-color: ${(props) => (props.alt ? "red" : "green")};
-  color: white;
-  border: 1px solid blue;
-  padding: 8px;
-  font: inherit;
-  cursor: pointer;
-  &:hover {
-    background-color: ${(props) => (props.alt ? "salmon" : "lightgreen")};
-    color: black;
-  }
-`;
-
-const StyledParagraph = styled.p`
-  color: ${(props) => props.items < 3 && "red"};
-  font-weight: ${(props) => props.items < 2 && "bold"};
-`;
-
 // class component
 class App extends Component {
+  constructor(props) {
+    super(props);
+    console.log("[App.js] constructor");
+    // can initialize state here with this.state = ....
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    console.log("[App.js] getDerivedStateFromProps");
+    return state;
+  }
+
   state = {
+    // this is also a way to initialize the state apart from using constructor
     persons: [
       { id: 1, name: "anil", age: 25 },
       { id: 2, name: "someone", age: 26 },
@@ -36,6 +30,8 @@ class App extends Component {
     ],
     otherState: "otherStateValue",
     isPersonsVisible: false,
+    showCockpit: true,
+    isLoggedIn: false,
   };
 
   deletePersonHandler = (personIndex) => {
@@ -62,45 +58,71 @@ class App extends Component {
 
   togglePersonsHandler = () => {
     const doShowPersons = this.state.isPersonsVisible;
-    this.setState({ showPersons: !doShowPersons });
+    this.setState({ isPersonsVisible: !doShowPersons });
+  };
+
+  loginHandler = () => {
+    this.setState({
+      isLoggedIn: !this.state.isLoggedIn,
+    });
   };
 
   render() {
+    console.log("[App.js] render");
+
     let persons = null;
 
     if (this.state.isPersonsVisible) {
       persons = (
-        <div>
-          {this.state.persons.map((person, index) => {
-            return (
-              <Person
-                click={() => this.deletePersonHandler(index)}
-                name={person.name}
-                age={person.age}
-                key={person.id}
-                onNameChange={(event) => this.onNameChange(event, person.id)}
-              />
-            );
-          })}
-        </div>
+        <Persons
+          persons={this.state.persons}
+          clicked={this.deletePersonHandler}
+          changed={this.onNameChange}
+        />
       );
     }
 
     return (
-      <div className="App">
-        <h1 className="App-title">Hi, imma react app</h1>
-        <StyledParagraph items={this.state.persons.length}>
-          I show list of persons
-        </StyledParagraph>
-        <StyledButton
-          alt={this.state.isPersonsVisible}
-          onClick={this.togglePersonsHandler}
+      <WithClassName>
+        <button
+          onClick={() =>
+            this.setState({ showCockpit: !this.state.showCockpit })
+          }
         >
-          Toggle persons
-        </StyledButton>
-        {persons}
-      </div>
+          Toggle Cockpit
+        </button>
+        <AuthContext.Provider
+          value={{
+            isLoggedIn: this.state.isLoggedIn,
+            login: this.loginHandler,
+          }}
+        >
+          {this.state.showCockpit ? (
+            <Cockpit
+              personsLength={this.state.persons.length}
+              showPersons={this.state.isPersonsVisible}
+              clicked={this.togglePersonsHandler}
+            />
+          ) : null}
+          {persons}
+        </AuthContext.Provider>
+      </WithClassName>
     );
+  }
+
+  componentDidMount() {
+    console.log("[App.js] componentDidMount");
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log("[App.js] shouldComponentUpdate");
+    return true;
+  }
+
+  // getSnapshotBeforeUpdate could also be there
+
+  componentDidUpdate() {
+    console.log("[App.js] componentDidUpdate");
   }
 }
 
